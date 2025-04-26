@@ -1,61 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SMB Project Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
+SMB is a SaaS platform built to allow administrators ("Admins") to upload, manage, and grant access to their own datasets. It operates in a multi-tenant, fully isolated environment where each Admin manages their own ecosystem without any super-admin controlling them.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Technology Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Backend
+- PHP 8.2
+- Laravel 12
+- MongoDB
+- MySQL
+- Redis
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Frontend
+- Vue 3
+- InertiaJS
+- TailwindCSS
+- Quasar (UI components)
 
-## Learning Laravel
+### Environment
+- Dockerized
+  - Separate `dev` and `prod` environments
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Authentication
+- Laravel Breeze (basic auth)
+- Socialite (Google, GitHub login)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Authorization
+- Spatie Laravel Permission (role management)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Business Logic
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- Each new user automatically becomes an **Admin**.
+- **Admin capabilities:**
+  - Upload JSON/XML datasets into MongoDB.
+  - Create their own users.
+  - Assign read/edit permissions to users.
+- **Data Isolation:**
+  - All data is isolated via `admin_id`.
+  - Users can only access their own Admin's data.
+- **Important:**
+  - Any user can become an Admin.
+  - No super-admin exists above all Admins.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+## Monetization Model
 
-## Contributing
+**Primary Payment:**
+- Admins pay SMB platform for access.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Secondary Payment (optional):**
+- Admins can collect payments from their users independently.
 
-## Code of Conduct
+**Subscription Plans:**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Plan        | Price   | Storage Limit | Users Limit | API Requests/Day | Upload Size Limit | Support         |
+|-------------|---------|---------------|-------------|------------------|-------------------|-----------------|
+| Start       | $9/mo   | 1 GB           | 5 users     | 1000             | 5 MB              | Email (48h SLA) |
+| Pro         | $29/mo  | 10 GB          | 50 users    | 10,000           | 50 MB             | Priority Email (24h SLA) |
+| Corporate   | On Request | 100 GB+      | 500+ users  | 100,000+         | 500 MB            | Dedicated Manager (4h SLA) |
 
-## Security Vulnerabilities
+**Storage/Request Overages:**
+- +$5 per additional GB
+- +$2 per 5 additional users
+- +$5 per 5000 additional API requests
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## API & Data Protection
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Rate Limiting:**
+- 1000 API requests/day for Start Plan.
+- 429 Too Many Requests if limit exceeded.
+
+**Storage Control:**
+- MongoDB document size and count monitoring.
+- Upload limits enforced at API.
+
+**Security:**
+- Strict `admin_id` checks on all API data access.
+- Never trust client-side admin references.
+
+**Logging:**
+- Full request and data operation logs for auditing.
+
+---
+
+## Subscription Management
+
+**Database Tables:**
+
+1. `plans`
+   - `id`
+   - `name`
+   - `price`
+   - `storage_limit_gb`
+   - `users_limit`
+   - `api_requests_per_day`
+   - `file_upload_limit_mb`
+
+2. `subscriptions`
+   - `id`
+   - `user_id` (Admin)
+   - `plan_id`
+   - `status` (active, canceled, unpaid)
+   - `starts_at`
+   - `ends_at`
+   - `storage_used_gb`
+   - `api_requests_today`
+
+3. `admins`
+   - `payment_provider_name`
+   - `payment_provider_link`
+   - `payment_status`
+
+---
+
+## Planned Payment Integrations
+
+**Admin Subscription to SMB:**
+- Paddle via Laravel Cashier Paddle.
+
+**Admin Receiving Payments from Users:**
+- Phase 1: Allow admins to set their own payment link manually.
+- Phase 2 (future): OAuth/API integration (e.g., Paddle Connect).
+
+**Jurisdiction:**
+- Initial operations focused on Georgia (Paysera preferred).
+- Future expansion to Paddle for global compliance.
+
+---
+
+## Development Stages
+
+| Stage         | Actions                                                               |
+|---------------|-----------------------------------------------------------------------|
+| MVP           | Start plan only, simple payment record, fake payments allowed         |
+| Initial Growth| Add Start + Pro plans, payment method required for activation         |
+| Scaling       | Add Corporate plan, lead capture form for custom deals                |
+| Maturity      | Dedicated servers for large customers (optional corporate scaling)    |
+
+---
+
+## Future Enhancements
+- Storage billing per GB/month.
+- Automatic suspension on unpaid invoices.
+- Admin dashboard for payment statistics.
+- User dashboard for subscription management.
+- Fine-grained access control for API endpoints (e.g., per feature limit).
+
+---
+
+## Final Notes
+This document outlines the initial setup for the SMB project including architecture, monetization, subscription flows, and future plans. Adjustments may be made as the project grows or based on client feedback.
+
+---
+
+**Document version: 2025-04-26**
