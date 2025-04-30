@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -24,4 +26,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware([
+    'auth',
+    RoleMiddleware::class . ':Admin',
+])->prefix('admin')->group(function () {
+    Route::resource('users', UserController::class);
+});
+
+require __DIR__ . '/auth.php';

@@ -1,10 +1,11 @@
-import { Quasar } from 'quasar'
+import { Ripple } from 'quasar'
 import '@quasar/extras/material-icons/material-icons.css'
-import 'quasar/src/css/index.sass'
+import 'quasar/dist/quasar.css'
 
 export default {
-    plugins: {
-        // Здесь можно подключить, например, Notify, Dialog, Loading
-        // Пример позже если надо
+    config: {},
+    plugins: [],
+    directives: {
+        Ripple,
     },
 }
