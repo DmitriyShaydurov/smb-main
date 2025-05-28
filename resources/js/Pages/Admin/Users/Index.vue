@@ -28,13 +28,13 @@ const props = defineProps<{
 const users = computed(() => props.users)
 
 const columns = [
-  { name: 'name', label: 'Name', field: 'name' },
-  { name: 'email', label: 'Email', field: 'email' },
-  { name: 'email_verified_at', label: 'Verified', field: 'email_verified_at' },
-  { name: 'created_at', label: 'Created', field: 'created_at' },
-  { name: 'updated_at', label: 'Updated', field: 'updated_at' },
-  { name: 'role', label: 'Role', field: 'role' },
-  { name: 'actions', label: 'Actions', field: 'actions', sortable: false }
+  { name: 'name', label: 'Name', field: 'name', align: 'left' },
+  { name: 'email', label: 'Email', field: 'email', align: 'left' },
+  { name: 'email_verified_at', label: 'Verified', field: 'email_verified_at', align: 'left' },
+  { name: 'created_at', label: 'Created', field: 'created_at', align: 'left' },
+  { name: 'updated_at', label: 'Updated', field: 'updated_at', align: 'left' },
+  { name: 'role', label: 'Role', field: 'role', align: 'left' },
+  { name: 'actions', label: 'Actions', field: 'actions', sortable: false, align: 'left' }
 ];
 
 function editUser(user: any): void {
@@ -48,3 +48,8 @@ function deleteUser(user: any): void {
   }
 }
 </script>
+<style scoped>
+.q-table th {
+  text-align: right;
+}
+</style>

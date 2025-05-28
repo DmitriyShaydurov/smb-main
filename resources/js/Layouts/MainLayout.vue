@@ -33,6 +33,13 @@
           </q-item-section>
           <q-item-section>Users</q-item-section>
         </q-item>
+
+        <q-item clickable v-ripple @click="go('/users')">
+          <q-item-section avatar>
+            <q-icon name="security" />
+          </q-item-section>
+          <q-item-section>Roles</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
