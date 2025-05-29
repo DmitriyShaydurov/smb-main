@@ -45,6 +45,10 @@ Estimated total duration: **4–6 weeks** (based on full-time commitment)
 ## Week 5: Subscriptions & UI Polishing
 
 - [ ] Add plans and fake payment logic
+- [ ] Implement hybrid payment logic (fiat + SMB token)
+- [ ] Add Solana wallet field to user profile
+- [ ] Check SMB token balance via JSON-RPC (≥ 100 for CSV export)
+- [ ] Gated CSV export feature using SMB tokens
 - [ ] Create `subscriptions` table logic
 - [ ] Show plan status in dashboard
 - [ ] Basic error handling and UI improvements

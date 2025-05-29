@@ -2,7 +2,7 @@
 
 ## Overview
 
-SMB is a SaaS platform built to allow administrators ("Admins") to upload, manage, and grant access to their own datasets. It operates in a multi-tenant, fully isolated environment where each Admin manages their own ecosystem without any super-admin controlling them.
+SMB is a hybrid Web2/Web3 SaaS platform that allows administrators ("Admins") to upload, manage, and grant access to their own datasets. It operates in a multi-tenant, fully isolated environment where each Admin manages their own ecosystem independently. Payments can be made in both fiat and SMB tokens.
 
 ---
 
@@ -44,32 +44,29 @@ SMB is a SaaS platform built to allow administrators ("Admins") to upload, manag
 - Each new user automatically becomes an **Admin**.
 - **Admin capabilities:**
   - Upload JSON/XML datasets into MongoDB.
-  - Create their own users.
-  - Assign read/edit permissions to users.
+  - Create and manage their own users.
+  - Assign read/edit permissions.
 - **Data Isolation:**
   - All data is isolated via `admin_id`.
-  - Users can only access their own Admin's data.
 - **API Access:**
-  - Uploaded datasets are automatically available via API.
-  - Authorized users can retrieve datasets through protected API routes based on their permissions.
+  - Uploaded datasets are available via protected API.
 - **Important:**
-  - Any user can become an Admin.
-  - No super-admin exists above all Admins.
+  - No super-admin exists. All Admins are equal.
 
 ---
 
 ## Data Storage Structure
 
-SMB stores all dataset records in a single shared MongoDB collection named `records`.
+All dataset records are stored in a single MongoDB collection `records`.
 
 Each record includes:
 
-- `admin_id`: to isolate data per Admin.
-- `dataset_id`: to associate each record with a logical collection (e.g., "employees").
-- `data`: raw content of the uploaded JSON row.
-- `created_at`: timestamp of the upload.
+- `admin_id`: to isolate data.
+- `dataset_id`: to group records logically.
+- `data`: uploaded row content.
+- `created_at`: timestamp.
 
-A separate `datasets` collection stores metadata about uploaded collections:
+Metadata is stored in the `datasets` collection:
 
 ```json
 {
@@ -83,150 +80,128 @@ A separate `datasets` collection stores metadata about uploaded collections:
 ```
 
 Benefits:
-
-- Efficient filtering and indexing using `admin_id` and `dataset_id`
-- No need to create dynamic MongoDB collections
-- Simplified API design
-- Fully isolated per Admin while keeping a scalable architecture
+- Unified schema
+- Simplified API
+- Isolation through `admin_id`
 
 ---
 
 ## Monetization Model
 
-**Primary Payment:**
+**Fiat Payment:**
+- Admins pay SMB directly in USD via Paysera or Paddle.
 
-- Admins pay SMB platform for access.
+**Token Payment (SMB token):**
+- Admins or users may unlock advanced features via holding or spending SMB tokens.
+- **Discounts apply when paying in SMB tokens.**
 
-**Secondary Payment (optional):**
+> ⚠️ *Note: Token-based pricing assumes internal rates. Without a DEX market, the value of SMB token is fixed and controlled within the platform. Token payments are not always cheaper in absolute terms but incentivized via fixed discounts.*
 
-- Admins can collect payments from their users independently.
+### Subscription Plans:
 
-**Subscription Plans:**
+| Plan      | Price (USD) | Price (SMB)* | Storage Limit | Users Limit | API Requests/Day | Upload Size Limit | Support                    |
+| --------- | ------------|--------------| --------------| ------------| ------------------| -------------------| ---------------------------|
+| Start     | $9/mo       | 90 SMB/mo    | 1 GB          | 5 users     | 1000              | 5 MB               | Email (48h SLA)            |
+| Pro       | $29/mo      | 270 SMB/mo   | 10 GB         | 50 users    | 10,000            | 50 MB              | Priority Email (24h SLA)   |
+| Corporate | On Request  | On Request   | 100 GB+       | 500+ users  | 100,000+          | 500 MB             | Dedicated Manager (4h SLA) |
 
-| Plan      | Price      | Storage Limit | Users Limit | API Requests/Day | Upload Size Limit | Support                    |
-| --------- | ---------- | ------------- | ----------- | ---------------- | ----------------- | -------------------------- |
-| Start     | $9/mo     | 1 GB          | 5 users     | 1000             | 5 MB              | Email (48h SLA)            |
-| Pro       | $29/mo    | 10 GB         | 50 users    | 10,000           | 50 MB             | Priority Email (24h SLA)   |
-| Corporate | On Request | 100 GB+       | 500+ users  | 100,000+         | 500 MB            | Dedicated Manager (4h SLA) |
-
-**Storage/Request Overages:**
-
-- +$5 per additional GB
-- +$2 per 5 additional users
-- +$5 per 5000 additional API requests
+**Overages:**
+- +$5 or 50 SMB per extra GB
+- +$2 or 20 SMB per 5 users
+- +$5 or 50 SMB per 5000 API requests
 
 ---
 
-## API & Data Protection
+## Web3 Enhancements via SMB Token
 
-**Authentication & Authorization:**
+**Features unlocked by holding or spending SMB tokens:**
 
-- Token-based access via Laravel Sanctum or Passport
-- `Authorization: Bearer <token>` required for API access
+- CSV export
+- Increased API rate limits
+- Custom branding
+- Access to premium datasets
+- DAO-style feature voting
+
+Token usage is flexible:
+- Holding model: access while balance ≥ threshold
+- Spending model: pay SMB to activate features
+- **SMB token provides access to premium features at discounted cost compared to fiat.**
+
+---
+
+## API & Security
+
+**Auth:**
+- Laravel Sanctum / Passport
+- `Authorization: Bearer <token>` required
 
 **Endpoints:**
+- `GET /api/collections`
+- `GET /api/collections/{id}/data`
+- `GET /api/collections/{id}/data/{record_id}`
 
-- `GET /api/collections` — list collections user has access to
-- `GET /api/collections/{id}/data` — list all records in a collection
-- `GET /api/collections/{id}/data/{record_id}` — get single record
-
-**Rate Limiting:**
-
-- 1000 API requests/day for Start Plan.
-- 429 Too Many Requests if limit exceeded.
-
-**Storage Control:**
-
-- MongoDB document size and count monitoring.
-- Upload limits enforced at API.
+**Limits:**
+- Enforced per subscription
+- Exceeding limits returns 429
 
 **Security:**
-
-- Strict `admin_id` checks on all API data access.
-- Never trust client-side admin references.
-
-**Logging:**
-
-- Full request and data operation logs for auditing.
+- All queries filtered by `admin_id`
+- Full audit logging
 
 ---
 
 ## Subscription Management
 
-**Database Tables:**
+**Key tables:**
 
 1. `plans`
-
-   - `id`
-   - `name`
-   - `price`
-   - `storage_limit_gb`
-   - `users_limit`
-   - `api_requests_per_day`
-   - `file_upload_limit_mb`
-
 2. `subscriptions`
-
-   - `id`
-   - `user_id` (Admin)
-   - `plan_id`
-   - `status` (active, canceled, unpaid)
-   - `starts_at`
-   - `ends_at`
-   - `storage_used_gb`
-   - `api_requests_today`
-
-3. `admins`
-
-   - `payment_provider_name`
-   - `payment_provider_link`
-   - `payment_status`
+3. `admins` (stores fiat/token payment method)
 
 ---
 
-## Planned Payment Integrations
+## Payment Integrations
 
-**Admin Subscription to SMB:**
-
-- Paddle via Laravel Cashier Paddle.
-
-**Admin Receiving Payments from Users:**
-
-- Phase 1: Allow admins to set their own payment link manually.
-- Phase 2 (future): OAuth/API integration (e.g., Paddle Connect).
-
-**Jurisdiction:**
-
-- Initial operations focused on Georgia (Paysera preferred).
-- Future expansion to Paddle for global compliance.
+- Admin payments: via Paddle or Paysera
+- Admins collecting payments from their users:
+  - Phase 1: manual link
+  - Phase 2: API integration (e.g., Paddle Connect)
 
 ---
 
-## Development Stages
+## Development Phases
 
-| Stage          | Actions                                                            |
-| -------------- | ------------------------------------------------------------------ |
-| MVP            | Start plan only, simple payment record, fake payments allowed      |
-| Initial Growth | Add Start + Pro plans, payment method required for activation      |
-| Scaling        | Add Corporate plan, lead capture form for custom deals             |
-| Maturity       | Dedicated servers for large customers (optional corporate scaling) |
-
----
-
-## Future Enhancements
-
-- Storage billing per GB/month.
-- Automatic suspension on unpaid invoices.
-- Admin dashboard for payment statistics.
-- User dashboard for subscription management.
-- Fine-grained access control for API endpoints (e.g., per feature limit).
+| Phase         | Goals                                                                 |
+|---------------|-----------------------------------------------------------------------|
+| MVP           | Start plan, fiat/token hybrid, minimal token-based features           |
+| Initial Growth| Add Pro plan, token-exclusive features                                |
+| Scaling       | Corporate plan, lead form                                             |
+| Maturity      | White-label deployments, staking, full token utility & DEX listing    |
 
 ---
 
-## Final Notes
+## Future Plans
 
-This document outlines the initial setup for the SMB project including architecture, monetization, subscription flows, and future plans. Adjustments may be made as the project grows or based on client feedback.
+- Granular API access per token
+- Public DEX listing of SMB
+- Staking for platform benefits
+- Reputation layer stored on-chain
+- **Smart contract-based access rules for token-only operations**
 
 ---
 
-**Document version: 2025-04-30**
+## Technical Implementation (Token Access)
+
+- Token stored on Solana (SPL standard)
+- No smart contract needed at MVP stage
+- Laravel will verify token balance using JSON-RPC:
+  - `getTokenAccountsByOwner`
+  - `getTokenAccountBalance`
+- Access features will be gated via middleware:
+  - Check wallet address linked to user
+  - Validate balance ≥ feature threshold
+- **Optional:** expose balance via `/me/token-status` endpoint
+
+---
+
+**Document version: 2025-05-28**
