@@ -86,31 +86,7 @@ Benefits:
 
 ---
 
-## Monetization Model
-
-**Fiat Payment:**
-- Admins pay SMB directly in USD via Paysera or Paddle.
-
-**Token Payment (SMB token):**
-- Admins or users may unlock advanced features via holding or spending SMB tokens.
-- **Discounts apply when paying in SMB tokens.**
-
-> ⚠️ *Note: Token-based pricing assumes internal rates. Without a DEX market, the value of SMB token is fixed and controlled within the platform. Token payments are not always cheaper in absolute terms but incentivized via fixed discounts.*
-
-### Subscription Plans:
-
-| Plan      | Price (USD) | Price (SMB)* | Storage Limit | Users Limit | API Requests/Day | Upload Size Limit | Support                    |
-| --------- | ------------|--------------| --------------| ------------| ------------------| -------------------| ---------------------------|
-| Start     | $9/mo       | 90 SMB/mo    | 1 GB          | 5 users     | 1000              | 5 MB               | Email (48h SLA)            |
-| Pro       | $29/mo      | 270 SMB/mo   | 10 GB         | 50 users    | 10,000            | 50 MB              | Priority Email (24h SLA)   |
-| Corporate | On Request  | On Request   | 100 GB+       | 500+ users  | 100,000+          | 500 MB             | Dedicated Manager (4h SLA) |
-
-**Overages:**
-- +$5 or 50 SMB per extra GB
-- +$2 or 20 SMB per 5 users
-- +$5 or 50 SMB per 5000 API requests
-
----
+[## Monetization Model](SMB_STUDIO_PRICING_README.md)
 
 ## Web3 Enhancements via SMB Token
 
