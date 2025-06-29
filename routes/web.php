@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\VueLearning\VuePlaygroundController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -31,6 +32,11 @@ Route::middleware([
     RoleMiddleware::class . ':Admin',
 ])->prefix('admin')->group(function () {
     Route::resource('users', UserController::class);
+});
+
+
+Route::middleware('auth')->prefix('dev')->group(function () {
+    Route::get('/hello', [VuePlaygroundController::class, 'hello'])->name('dev.hello');
 });
 
 require __DIR__ . '/auth.php';
